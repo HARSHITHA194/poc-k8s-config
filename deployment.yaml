@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poc-web
+  labels:
+    app: poc-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: poc-web
+  template:
+    metadata:
+      labels:
+        app: poc-web
+    spec:
+      containers:
+        - name: poc-web
+          # Jenkins rewrites this line on every successful build
+          image: YOUR_REGISTRY.azurecr.io/poc-web:1
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef: { name: poc-db, key: host }
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef: { name: poc-db, key: name }
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef: { name: poc-db, key: user }
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: poc-db, key: password }
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 256Mi }
