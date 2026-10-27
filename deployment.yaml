@@ -21,7 +21,7 @@ spec:
       containers:
         - name: poc-web
           # Jenkins rewrites this line on every successful build
-          image: docker.io/harshitha1904/poc-web:6
+          image: docker.io/harshitha1904/poc-web:7
           ports:
             - containerPort: 8080
           env:
